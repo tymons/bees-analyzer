@@ -2,6 +2,15 @@ source(file = "sound-utils.R")
 source(file = "sound-time.R")
 source(file = "sound-frequency.R")
 
+damping = -6
+soundFeatures = data.frame(RMS = 0.0,
+                           meanFreqDataRaw = 0.0,
+                           RVFdataRaw = 0.0,
+                           bandwidth = 0.0,
+                           RVFdataFiltered = 0.0,
+                           meanFreqDatFiltered = 0.0
+                           ) 
+
 # Get file
 soundvalues <-read.csv(file="~/Projects/003.eUL/workspace/Ranalysis/data/csvresults/mic1/1608-2017-04-01T11:15:30-soundvalues.csv",sep=" ", skip = 400)
 
@@ -10,18 +19,26 @@ soundDataFrame <- prepareSoundFrame(soundvalues)
 soundParams <- getSoundParams(soundDataFrame)
 
 # Time analysis
-soundTimeFaetures <- timeAnalyzeSound(soundDataFrame$probe)
+soundFeatures$RMS <- RMS(soundDataFrame$probe)
 soundTimePlot <- plotBasics(soundDataFrame, x = soundDataFrame$time, y = soundDataFrame$probe, 'Time [s]', 'Amplitude [mV]')
 
 # Frequency analysis
-soundFFTDataFrame <- prepareFFT(soundDataFrame$probe, soundParams$N)
-soundFreqFeatures <- freqAnalyzeSound(soundFFTDataFrame)
-soundSupLogFFTDataFrame <- getSuppressedLogFFT(soundFFTDataFrame, -6)
-soundFreqFeatures["bandwidth"] <- getBandwidth(soundSupLogFFTDataFrame$fftAmpDb, -6)
+# Get Raw FFT and supressed
+soundFFTDataFrame <- calculateFFT(soundDataFrame$probe, soundParams$N)
+soundSupLogFFTDataFrame <- calculateSuppressedLogFFT(soundFFTDataFrame, damping)
+# Calculate features
+soundFreqFeatures <- calculatePeakFreqWithAmp(soundFFTDataFrame)
+soundFeatures <- merge(soundFeatures, soundFreqFeatures)
+soundFeatures$meanFreqDataRaw <- fastmean(soundFFTDataFrame$xf, soundFFTDataFrame$fftAmp)
+soundFeatures$RVFdataRaw <- calculateRVF(soundFFTDataFrame, 0)
+# Calculate features on filtered data
+soundFeatures$bandwidth <- calculateBandwidth(soundSupLogFFTDataFrame$fftAmpDb, damping)
+soundFeatures$RVFdataFiltered <- calculateRVF(soundSupLogFFTDataFrame, damping)
+soundFeatures$meanFreqDatFiltered <- fastmean(soundSupLogFFTDataFrame$xf,(soundSupLogFFTDataFrame$fftAmpDb - damping))
+
 soundFreqPlot <- plotBasics(soundFFTDataFrame, x = soundFFTDataFrame$xf, y = soundFFTDataFrame$fftAmp, 'Frequency [Hz]', 'Coefficent Amplitude')
 soundFreqSubLogPlot <- plotBasics(soundSupLogFFTDataFrame, x = soundSupLogFFTDataFrame$xf, y = soundSupLogFFTDataFrame$fftAmp, 'Frequency [Hz]', 'Coefficent Amplitude [dBV]')
 subplot(soundFreqPlot, soundFreqSubLogPlot, nrows = 2)
 
-soundFeatures <- merge(soundTimeFaetures, soundFreqFeatures)
 
 
