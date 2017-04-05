@@ -11,10 +11,10 @@ if [ -z "$3" ]; then
   echo "You didnt specify catalog name"
   exit
 else
-  if [ -d "$DATA_RESULT_DIC/$3" ]; then
-    rm -rf "$DATA_RESULT_DIC/$3"
-  fi
-  mkdir "$DATA_RESULT_DIC/$3"
+  #if [ -d "$DATA_RESULT_DIC/$3" ]; then
+  #  rm -rf "$DATA_RESULT_DIC/$3"
+  #fi
+  #mkdir "$DATA_RESULT_DIC/$3"
   DATA_RESULT_DIC+=/$3
 fi
 
@@ -35,5 +35,8 @@ echo "Your start and end ids are: $START_ID/$END_ID which gives you $NUM_OF_SOUN
 for (( c=$START_ID; c<=$END_ID; c++ ))
 do
    FILE="$(find $DATA_ROOT_DIC/mic1 -name '*'$c'*.csv')"
-   cp $FILE $DATA_RESULT_DIC/
+   DATE="$(find $DATA_ROOT_DIC/mic1 -name '*'$c'*.csv' | awk -F'-' '{print $2 "-" $3 "-" $4}')"
+   DATE=$(echo "$DATE" | tr '[T]' ' ')
+   echo $DATE
+   #cp $FILE $DATA_RESULT_DIC/
 done
