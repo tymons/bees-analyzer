@@ -46,8 +46,8 @@ echo "Searching $TEMP_FILE_NAME and $HUM_FILE_NAME for proper values..."
 
 for (( c=$START_ID; c<=$END_ID; c++ ))
 do
-   FILE="$(find $DATA_ROOT_DIC/mic1 -name '*'$c'*.csv')"
-   DATE_T="$(find $DATA_ROOT_DIC/mic1 -name '*'$c'*.csv' | awk -F'-' '{print $2 "-" $3 "-" $4}')"
+   FILE="$(find $DATA_ROOT_DIC/mic1 -name $c'*.csv')"
+   DATE_T="$(echo $FILE | awk -F'-' '{print $2 "-" $3 "-" $4}')"
    DATE="$(echo "$DATE_T" | tr '[T]' ' ')"
    ROW_TEMP="$(cat "$DATA_ROOT_DIC/thermal/temperature/$TEMP_FILE_NAME" | grep "$DATE" | awk -F',' '{print $1}')"
    ROW_HUM="$(cat "$DATA_ROOT_DIC/thermal/humidity/$HUM_FILE_NAME" | grep "$DATE" | awk -F',' '{print $1}')"
