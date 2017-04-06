@@ -2,18 +2,16 @@ source(file = "sound-utils.R")
 source(file = "sound-time.R")
 source(file = "sound-frequency.R")
 
-soundFeatures = data.frame(RMS = 0.0,
-                           meanFreqDataRaw = 0.0,
-                           RVFdataRaw = 0.0,
-                           bandwidth = 0.0,
-                           RVFdataFiltered = 0.0,
-                           meanFreqDatFiltered = 0.0) 
-
-analyzeSound <- function(filename) {
+analyzeSound <- function(filename, skip) {
+  soundFeatures = data.frame(RMS = 0.0,
+                             meanFreqDataRaw = 0.0,
+                             RVFdataRaw = 0.0,
+                             bandwidth = 0.0,
+                             RVFdataFiltered = 0.0,
+                             meanFreqDatFiltered = 0.0) 
   damping = -6
-  
   # Get file
-  soundvalues <-read.csv(file="~/Projects/003.eUL/workspace/Ranalysis/data/csvresults/mic1/1890-2017-04-04T15:45:30-soundvalues.csv" ,sep=" ", skip = 400)
+  soundvalues <-read.csv(file=filename ,sep=" ", skip = skip)
 
   # Prepare sound data for analysis
   soundDataFrame <- prepareSoundFrame(soundvalues)
@@ -25,7 +23,7 @@ analyzeSound <- function(filename) {
   
   # Frequency analysis
   # Get Raw FFT and supressed
-  soundFFTDataFrame <- calculateFFT(soundDataFrame$probe, soundParams$N)
+  soundFFTDataFrame <- calculateFFT(soundDataFrame$probe, soundParams$N + skip)
   soundSupLogFFTDataFrame <- calculateSuppressedLogFFT(soundFFTDataFrame, damping)
   # Calculate features
   soundFreqFeatures <- calculatePeakFreqWithAmp(soundFFTDataFrame)

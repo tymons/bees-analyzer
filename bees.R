@@ -3,18 +3,30 @@ library(plotly)
 source(file = "sound.R")
 source(file = "sound-utils.R")
 
+dirName <- "full"
 
-temperaturevalues <- read_csv("~/Projects/003.eUL/workspace/Ranalysis/data/csvresults/thermal/temperature/2017-04-02T10:00:00 to 2017-04-04T23:23:20-temperaturevalues.csv", n_max = 800)
-humidityvalues <- read_csv("~/Projects/003.eUL/workspace/Ranalysis/data/csvresults/thermal/humidity/2017-04-02T10:00:00 to 2017-04-04T23:23:38-humidityvalues.csv", n_max = 800)
+dataTempDir <- paste0("~/Projects/003.eUL/workspace/Ranalysis/data/temp/", dirName, "/temperatures.csv")
+dataHumDir <- paste0("~/Projects/003.eUL/workspace/Ranalysis/data/temp/", dirName, "/humidities.csv")
 
-thermalData = data.frame(temp = temperaturevalues$value, hum = humidityvalues$value)
+temperaturevalues <- read_csv(dataTempDir, col_names = FALSE)
+humidityvalues <- read_csv(dataHumDir, col_names = FALSE)
+colnames(temperaturevalues) <- "temperature"
+colnames(humidityvalues) <- "humidity"
 
-for(i in 1000:1890) {
-  
-  #soundFeaturesData = analyzeSound("~/Projects/003.eUL/workspace/Ranalysis/data/csvresults/mic1/1890-2017-04-04T15:45:30-soundvalues.csv")   
-  #soundFeaturesDataSet = rbind(soundFeaturesDataSet,soundFeaturesData)
+soundFeatures = data.frame()
+for(i in 0:(length(temperaturevalues$temperature)-1)) {
+  soundFeatures = rbind(soundFeatures, analyzeSound(paste0("~/Projects/003.eUL/workspace/Ranalysis/data/temp/", dirName,"/", i, ".csv"), 400))
 }
 
+soundFeatures["Temp"] <- temperaturevalues
+soundFeatures["Hum"] <- humidityvalues
 
-cor(thermalData$temp, thermalData$hum)
+corrMatrix = matrix(nrow=length(soundFeatures), ncol=length(soundFeatures)) 
+dimnames(corrMatrix) = list(colnames(soundFeatures), colnames(soundFeatures)) 
+
+for(i in 1:nrow(corrMatrix)) {
+  for(j in 1:ncol(corrMatrix)) {
+    corrMatrix[i, j] = cor(soundFeatures[, i], soundFeatures[, j])
+  }
+}
 
