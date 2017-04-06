@@ -1,4 +1,7 @@
 #!/bin/bash
+RED=$(tput setaf 1)
+RESET=$(tput sgr0)
+echo -e "${RED}\nTHIS IS SCRIPT FOR PREPARING DATA TO ANALYSIS. BE SURE THAT ALL DATA IS READY!!!\n${RESET}"
 
 DATA_ROOT_DIC='/home/tymons/Projects/003.eUL/workspace/Ranalysis/data/csvresults'
 DATA_RESULT_DIC='/home/tymons/Projects/003.eUL/workspace/Ranalysis/data/temp'
@@ -49,10 +52,29 @@ do
    FILE="$(find $DATA_ROOT_DIC/mic1 -name $c'*.csv')"
    DATE_T="$(echo $FILE | awk -F'-' '{print $2 "-" $3 "-" $4}')"
    DATE="$(echo "$DATE_T" | tr '[T]' ' ')"
+   DATE_WITHOUT_SEC=$(echo $DATE | awk -F':' '{print $1 ":" $2}')
    ROW_TEMP="$(cat "$DATA_ROOT_DIC/thermal/temperature/$TEMP_FILE_NAME" | grep "$DATE" | awk -F',' '{print $1}')"
    ROW_HUM="$(cat "$DATA_ROOT_DIC/thermal/humidity/$HUM_FILE_NAME" | grep "$DATE" | awk -F',' '{print $1}')"
+   ROW_OUTDOOR=$(cat "$DATA_ROOT_DIC/thermal/thermal-outdoor/thermal-koteze.csv" | grep -a "$DATE_WITHOUT_SEC")
+   ROW_OUTDOOR_TEMP=$(echo $ROW_OUTDOOR | awk -F',' '{print $1}')
+   ROW_OUTDOOR_HUM=$(echo $ROW_OUTDOOR | awk -F',' '{print $2}')
+   ROW_OUTDOOR_PRESS=$(echo $ROW_OUTDOOR | awk -F',' '{print $3}')
+
+   if [ -z "$ROW_OUTDOOR_TEMP" ]; then
+     # There is missing entry for that time, round thermal to one hour
+     DATE_WITHOUT_SEC=$(echo $DATE | awk -F':' '{print $1}')
+     ROW_OUTDOOR=$(cat "$DATA_ROOT_DIC/thermal/thermal-outdoor/thermal-koteze.csv" | grep -a "$DATE_WITHOUT_SEC")
+     ROW_OUTDOOR_TEMP=$(echo $ROW_OUTDOOR | awk -F',' '{print $1}')
+     ROW_OUTDOOR_HUM=$(echo $ROW_OUTDOOR | awk -F',' '{print $2}')
+     ROW_OUTDOOR_PRESS=$(echo $ROW_OUTDOOR | awk -F',' '{print $3}')
+   fi
+
    echo "$ROW_TEMP" >> "$DATA_RESULT_DIC/$3/temperatures.csv"
    echo "$ROW_HUM" >> "$DATA_RESULT_DIC/$3/humidities.csv"
+   echo "$ROW_OUTDOOR_TEMP" >> "$DATA_RESULT_DIC/$3/temperature-outdoor.csv"
+   echo "$ROW_OUTDOOR_HUM" >> "$DATA_RESULT_DIC/$3/humidities-outdoor.csv"
+   echo "$ROW_OUTDOOR_PRESS" >> "$DATA_RESULT_DIC/$3/pressure-outdoor.csv"
+
    cp $FILE "$DATA_RESULT_DIC/$3/$(($c-$START_ID)).csv"
 done
 
