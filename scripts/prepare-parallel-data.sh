@@ -49,8 +49,10 @@ do
    FILE="$(find $DATA_ROOT_DIC/mic1 -name '*'$c'*.csv')"
    DATE_T="$(find $DATA_ROOT_DIC/mic1 -name '*'$c'*.csv' | awk -F'-' '{print $2 "-" $3 "-" $4}')"
    DATE="$(echo "$DATE_T" | tr '[T]' ' ')"
-   ROW="$(cat "$DATA_ROOT_DIC/thermal/temperature/$TEMP_FILE_NAME" | grep "$DATE" | awk -F',' '{print $1}')"
-   echo "$ROW" >> "$DATA_RESULT_DIC/$3/temperatures.csv"
+   ROW_TEMP="$(cat "$DATA_ROOT_DIC/thermal/temperature/$TEMP_FILE_NAME" | grep "$DATE" | awk -F',' '{print $1}')"
+   ROW_HUM="$(cat "$DATA_ROOT_DIC/thermal/humidity/$HUM_FILE_NAME" | grep "$DATE" | awk -F',' '{print $1}')"
+   echo "$ROW_TEMP" >> "$DATA_RESULT_DIC/$3/temperatures.csv"
+   echo "$ROW_HUM" >> "$DATA_RESULT_DIC/$3/humidities.csv"
    cp $FILE "$DATA_RESULT_DIC/$3/$(($c-$START_ID)).csv"
 done
 
