@@ -18,7 +18,7 @@ calculatePeakFreqWithAmp<- function(samples) {
 }
 
 calculateSuppressedLogFFT <- function(samples, db) {
-  fftDb <- 20*log10(samples$fftAmp/max(samples$fftAmp))
+  fftDb <- 10*log10(samples$fftAmp/max(samples$fftAmp))
   fft6dBFilter = Vectorize(dget("fft6dBfilter.R"))
   fftDbFiltered <- fft6dBFilter(fftDb, db)
   data.frame(fftAmpDb = fftDbFiltered, xf = samples$xf)

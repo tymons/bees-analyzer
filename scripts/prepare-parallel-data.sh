@@ -50,6 +50,10 @@ echo "Searching $TEMP_FILE_NAME and $HUM_FILE_NAME for proper values..."
 for (( c=$START_ID; c<=$END_ID; c++ ))
 do
    FILE="$(find $DATA_ROOT_DIC/mic1 -name $c'*.csv')"
+   if [ -z "$FILE" ]; then
+     echo "DAFUQ? missing ($FILE) FILE? File: $c'*.csv' Skipping.. "
+     continue
+   fi
    DATE_T="$(echo $FILE | awk -F'-' '{print $2 "-" $3 "-" $4}')"
    DATE="$(echo "$DATE_T" | tr '[T]' ' ')"
    DATE_WITHOUT_SEC=$(echo $DATE | awk -F':' '{print $1 ":" $2}')
@@ -67,6 +71,17 @@ do
      ROW_OUTDOOR_TEMP=$(echo $ROW_OUTDOOR | awk -F',' '{print $1}')
      ROW_OUTDOOR_HUM=$(echo $ROW_OUTDOOR | awk -F',' '{print $2}')
      ROW_OUTDOOR_PRESS=$(echo $ROW_OUTDOOR | awk -F',' '{print $3}')
+     if [ -z "$ROW_OUTDOOR" ]; then
+        echo "MISSING OUTDOOR THERMAL DATA FOR $DATE_WITHOUT_SEC ! Update this manually."
+     fi
+   fi
+
+   if [ -z "$ROW_TEMP" ]; then
+     echo "MISSING TEMPERATURE FOR $DATE ! Update this manually."
+   fi
+
+   if [ -z "$ROW_HUM" ]; then
+     echo "MISSING HUMIDITY FOR $DATE ! Update this manually."
    fi
 
    echo "$ROW_TEMP" >> "$DATA_RESULT_DIC/$3/temperatures.csv"
@@ -74,7 +89,7 @@ do
    echo "$ROW_OUTDOOR_TEMP" >> "$DATA_RESULT_DIC/$3/temperature-outdoor.csv"
    echo "$ROW_OUTDOOR_HUM" >> "$DATA_RESULT_DIC/$3/humidities-outdoor.csv"
    echo "$ROW_OUTDOOR_PRESS" >> "$DATA_RESULT_DIC/$3/pressure-outdoor.csv"
-
+   # Copy sound value
    cp $FILE "$DATA_RESULT_DIC/$3/$(($c-$START_ID)).csv"
 done
 

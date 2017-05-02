@@ -43,5 +43,3 @@ for(i in 1:nrow(corrMatrix)) {
   }
 }
 
-corrMatrix <- round(corrMatrix, digits = 2)
-write.csv(corrMatrix, file = "/home/tymons/correlation-matrix.csv")
