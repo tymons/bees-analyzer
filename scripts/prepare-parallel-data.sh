@@ -90,7 +90,8 @@ do
    echo "$ROW_OUTDOOR_HUM" >> "$DATA_RESULT_DIC/$3/humidities-outdoor.csv"
    echo "$ROW_OUTDOOR_PRESS" >> "$DATA_RESULT_DIC/$3/pressure-outdoor.csv"
    # Copy sound value
-   cp $FILE "$DATA_RESULT_DIC/$3/$(($c-$START_ID)).csv"
+   IDX=$(($IDX+1))
+   cp $FILE "$DATA_RESULT_DIC/$3/$IDX.csv"
 done
 
 echo "Done! Results are in "$DATA_RESULT_DIC/$3" directory"
