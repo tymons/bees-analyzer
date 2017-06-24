@@ -63,7 +63,6 @@ do
    ROW_OUTDOOR_TEMP=$(echo $ROW_OUTDOOR | awk -F',' '{print $1}')
    ROW_OUTDOOR_HUM=$(echo $ROW_OUTDOOR | awk -F',' '{print $2}')
    ROW_OUTDOOR_PRESS=$(echo $ROW_OUTDOOR | awk -F',' '{print $3}')
-
    if [ -z "$ROW_OUTDOOR_TEMP" ]; then
      # There is missing entry for that time, round thermal to one hour
      DATE_WITHOUT_SEC=$(echo $DATE | awk -F':' '{print $1}')
@@ -77,11 +76,17 @@ do
    fi
 
    if [ -z "$ROW_TEMP" ]; then
-     echo "MISSING TEMPERATURE FOR $DATE ! Update this manually."
+     ROW_TEMP=$ROW_TEMP_LAST
+     if [ -z "$ROW_TEMP" ]; then
+     	echo "MISSING TWO ROWS OF TEMPERATURES - ONE AFTER ANOTHER. CANNOT UPDATE BY LASTONE! INSPECT CSV OUTPUT AND UPDATE BY HAND ($c)"
+     fi
    fi
 
    if [ -z "$ROW_HUM" ]; then
-     echo "MISSING HUMIDITY FOR $DATE ! Update this manually."
+     ROW_HUM=$ROW_HUM_LAST
+     if [ -z "$ROW_HUM" ]; then
+	echo "MISSING TWO ROWS OF HUMIDITIES - ONE AFTER ANOTHER. CANNOT UPDATE BY LAST ONE! INSPECT CSV OUTPUT AND UPDATE BY HAND ($c)."
+     fi
    fi
 
    echo "$ROW_TEMP" >> "$DATA_RESULT_DIC/$3/temperatures.csv"
@@ -89,6 +94,12 @@ do
    echo "$ROW_OUTDOOR_TEMP" >> "$DATA_RESULT_DIC/$3/temperature-outdoor.csv"
    echo "$ROW_OUTDOOR_HUM" >> "$DATA_RESULT_DIC/$3/humidities-outdoor.csv"
    echo "$ROW_OUTDOOR_PRESS" >> "$DATA_RESULT_DIC/$3/pressure-outdoor.csv"
+   echo "$DATE" >> "$DATA_RESULT_DIC/$3/labels-timestamp.csv"
+   ROW_TEMP_LAST=$ROW_TEMP
+   ROW_HUM_LAST=$ROW_HUM
+   ROW_OUTDOOR_TEMP_LAST=$ROW_OUTDOOR_TEMP
+   ROW_OUTDOOR_HUM_LAST=$ROW_OUTDOOR_HUM
+   ROW_OUTDOOR_PRESS_LAST=$ROW_OUTDOOR_PRESS
    # Copy sound value
    IDX=$(($IDX+1))
    cp $FILE "$DATA_RESULT_DIC/$3/$IDX.csv"
